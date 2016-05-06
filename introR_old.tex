@@ -1,0 +1,796 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{amsmath}
+ \usepackage{hyperref}
+ \usepackage{threeparttable}
+ \usepackage{verbatim}
+ \hypersetup{	colorlinks=true,
+			citecolor=black,
+			pdftex}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\title{An Introduction to R for Ecological and Evolutionary Research}
+\author{Andy Rominger and Becca Terry}
+\date{}                                           % Activate to display a given date or no date
+
+
+\newcommand{\R}[1] {
+	\item \texttt{#1}
+}
+
+\newenvironment{verbatim}{ 
+	\indent
+	\begin{list}{}{\setlength{\itemsep}{-1.5mm}}
+}{
+	\end{list}
+}
+
+%\makeindex
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Getting Started}
+
+\paragraph{What to expect in this tutorial}
+This tutorial hopes to take a user who has never used \verb+R+ to a level of proficiency sufficient to preform many basic analytical tasks, such as importing data, manipulating data and extracting useful information from data stored in \verb+R+, conducting basic statistical tests, and plotting data.  Once these tasks have been mastered, it is hoped that a user can further explore through this tutorial how to conduct more complicate statistical procedures, analyze phylogenetic data, and harness geo-spatial data to use in other analyses.  This tutorial makes use of several data sets which we summarize in Table \ref{datasets}.  In order to follow examples, it is advisable to first download these data.
+
+This tutorial is aimed primarily at the computational side of ecological and evolutionary data analysis.  Hence, while some explanation will be given for statistical inference techniques, a deeper understanding must be sought elsewhere.
+
+\begin{table}[!htb]
+	\caption{Data sets used in this tutorial}	\label{datasets}
+
+	\begin{tabular}{r l l}
+		\hline
+		File name 	&	\multicolumn{1}{c}{Column names}		&	\multicolumn{1}{c}{Description}		\\
+		\hline
+		\verb+GrasshopperAbundance+	&	\verb+subfamily+	&	Grasshopper subfamily			\\
+									&	\verb+species+		&	Grasshopper species			\\
+									&	\verb+abund06+	&	Recorded abundance in 2006		\\
+									&	\verb+abund07+	&	Recorded abundance in 2007		\\
+		\hline
+	\end{tabular}
+\end{table}
+
+\subsection{Installing R}
+Go to \href{url}{www.r-project.org}.
+\\
+\\
+In the side bar, click the CRAN link (under Download). This will direct you to a list of mirrors from which you can select a near-by host. Click the mirror link and then click on your appropriate OS. Follow the download instructions.
+
+Further packages can be installed within the \verb+R+ environment using the \verb+Packages &+ \verb+Data+ pulldown, or using the function \verb+install.packages+.  \verb+Packages & Data+ allows you to search for packages and then install them.  To use the function \verb+install.packages+ type directly into the console \verb+install.packages("package")+ where \verb+package+ is the name of the desired package. To then load the package into your current workspace, use the command \verb+library(package)+ or \verb+require(package)+.  Section \ref{sec:commands} on commands in \verb+R+ will explain functions, and sections \ref{sec:phylo} and \ref{sec:geo} on phylogenetics and geographic data will provide examples of using auxiliary packages.
+
+\begin{table}[!htb]
+	\caption{Useful functions for import and set-up}
+
+	\begin{tabular}{r l l}
+		\hline
+		Function 	&	\multicolumn{1}{c}{Arguments}		&	\multicolumn{1}{c}{Output}		\\
+		\hline
+		\verb+install.packages+	&	package name in quotes		&	imports the desired package	\\
+		\verb+library+			&	package name (no quotes)	&	loads package into memory	\\
+		\verb+require+			&	same as above				&	same as above				\\
+		\hline
+	\end{tabular}
+\end{table}
+
+\subsection{Using commands in R}	
+\label{sec:commands}  Whatever the task to be completed in \verb+R+, we do so using commands, often in the command-line console environment.  Commands are given using operators (e.g. \verb&*,/,+,-&) or functions (e.g. \verb+mean(data)+).  Most functions take arguments, which the user specifies, and which control how or what the function computes.  Let's consider an example.  Suppose we want to produce 10 random numbers drawn from a normal distribution with mean = 1 and variance = 4.  We do so with the command 
+\begin{verbatim}
+	\R{rnorm(n=10,mean=1,sd=2).}
+\end{verbatim}
+Here the function is \verb+rnorm+ and the arguments are \verb+n+, which specifies how many numbers we want to draw, \verb+mean+, which specifies the mean, and \verb+sd+, which specifies the standard deviation, i.e. the square root of the variance.  For more on drawing samples from probability distributions see section \ref{sec:distrib}.
+
+\subsection{Getting help}	\label{sec:help}
+No one can know the arguments of functions intuitively.  To learn more about functions, there help pages, which we can find with the question mark (\verb+?+).  For example
+\begin{verbatim}
+	\R{?rnorm}
+\end{verbatim}
+provides us with information about the use of the function, its arguments, the details underlying its computation and its output (i.e. value) and, most help pages provide examples.
+
+If we don't know the desired function there are many resources online.  Providing Google with keywords such as ``r sample normal distribution'' or perhaps ``r-project sample normal distribution'' will typically produce an answer to ``which function should I use?''
+
+\subsection{Assigning objects in R}
+Suppose we wanted to store this sample of 10 numbers.  To do so we must simply assign it to a name which will be stored in memory.  For example 
+\begin{verbatim}
+	\R{my.norm <- rnorm(n=10,mean=1,sd=2)}
+	\R{my.norm}
+\end{verbatim}
+By again typing \verb+my.norm+ (and pressing enter) we retrieve those 10 numbers.  In the first line of code, we made an object that contains the numbers.  We made this object with the ``assign'' command, i.e. the \verb+<-+ symbol, which means ``assign what's on the right-hand-side to what's on the left-hand-side.''  \verb+R+ will also let you use \verb+=+ for this purpose, but it is good etiquette to separate assigning objects (\verb+<-+) from specifying arguments in functions (\verb+=+).
+
+\begin{table}[!htb]
+	\begin{threeparttable}
+	\caption{Basic operators and arithmetic functions}
+
+	\begin{tabular}{r l l}
+		\hline
+		Command 	&	\multicolumn{1}{l}{Use\tnote{a}}		&	\multicolumn{1}{c}{Example}		\\
+		\hline
+		\verb+<-+		&	Assignment of object to name in memory	&	\verb+x <- 5,+ 				\\
+					&									&	\verb+y <- c(1,2,3,4)+\tnote{b}	\\
+		\verb+=+		&	Specifies values of arguments in functions	&	\verb+rnorm(n=10)+		\\
+		\verb|+ - * /|	&	Preforms addition, subtraction, etc.		&	\verb|4 + 3|				\\
+		\verb+^+		&	Raises a number to a power			&	\verb+2^2+				\\
+		\verb+exp+	&	Raise $e$ to a power				&	\verb+exp(0), exp(1),+		\\
+					&									&	\verb+exp(2)+				\\
+		\verb+sqrt+	&	takes square root					&	\verb+sqrt(4)+				\\
+		\verb+mean, median+&	computes mean, median, etc. 		&	\verb+mean(y), sd(y)+		\\
+		\verb+var, sd+	&									&							\\	
+		\hline
+	\end{tabular}
+	\begin{tablenotes}
+		\item[a] Many functions can be used with much finesse, which we can't summarize here. \\Consult the help pages, see section \ref{sec:help}.
+		\item[b] For details on using the \texttt{c} function see section \ref{sec:vector}
+	\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+
+\subsection{A note on classes in R}
+\verb+R+ is an object-oriented programming language, and as such has class definitions.  Not knowing the details of what that means is not a major limitation; however it is helpful to have a basic understanding.  All objects belong to a class (potentially multiple) and this class identity determines what can be done to or with a given object.  A silly abstract example is the difference between an object that is of class \verb+wall+ and an object that is of class \verb+human+.  You can talk to a human, but you shouldn't talk to a wall.  Similarly, a human can be used to build a wall (perhaps using the function \verb+build.wall(method=human)+), but no function can use a wall to build a human.  \verb+R+ has various classes, some of which you'll learn as we go. Some examples are \verb+numeric+, which is the class of our \verb+my.norm+ object, and \verb+data.frame+, which is the class of spread sheet like objects in \verb+R+ and the default class of anything read into \verb+R+ using \verb+read.csv+ or \verb+read.table+ (see section \ref{sec:reading}).
+
+\subsection{Data structures in R}
+Before delving any further we summarize some important classes and structures (a group of related classes) pertaining to data storing and organization in \verb+R+.
+
+\subsubsection{Vector}	\label{sec:vector}
+This is the most basic data structure.  A vector can be composed of numbers, characters, character strings, or booleans (\verb+TRUE+/\verb+FALSE+ values).  Vectors can be created using various functions, for example we create a vector of three zeros in four different ways:
+\begin{verbatim}
+	\R{x1 <- c(0,0,0)}
+	\R{x2 <- rep(0,times = 3)}
+	\R{x3 <- numeric(length=3)}
+	\R{x4 <- vector(type = "numeric", length = 3).}
+\end{verbatim}
+The \verb+c+ function can also be conveniently used to create vectors of unique numbers, characters and booleans, for example:
+\begin{verbatim}
+	\R{x <- c(1,2.3,3.1)}
+	\R{y <- c("a","b","c")}
+	\R{z <- c(TRUE,TRUE,FALSE)}
+\end{verbatim}
+To determine the number of elements in a vector, we use the function \verb+length+.  For example \verb+length(x)+ will equal three.
+
+We can also easily make vectors of consecutive integers using a colon
+\begin{verbatim}
+	\R{x.seq <- 1:4}
+\end{verbatim}
+Similarly, we could use the \verb+seq+ function, which can also be used to make more complicated sequences of numbers
+ \begin{verbatim}
+	\R{x.seq <- seq(from=1, to=4)}
+	\R{x.seq1 <- seq(from=1, to=4, by=0.2)}
+	\R{x.seq2 <- seq(from=1, by=0.2, length.out=16)} 
+\end{verbatim}
+
+Vectors, especially numeric vectors, are commonly used in \verb+R+ functions, such as in conducting a t-test (testing the means of two $\mathbf{vectors}$) or in plotting data points (plotting two $\mathbf{vectors}$ in a Cartesian coordinate system).
+
+We can access different parts (i.e. ``elements'') of a vector using indices set off by square brackets \verb+[ ]+.  For example, suppose we wanted only the first two elements of the vector \verb+x+, we would simply type:
+\begin{verbatim}
+	\R{x[1:2]	\# note 1:2 is another vector}
+\end{verbatim}
+or we could equally well use \verb+TRUE+'s and \verb+FALSE+'s to indicate which elements we desire:
+\begin{verbatim}
+	\R{x[z]	\# recall z is a vector of booleans}
+\end{verbatim}
+We can also use indices to help us change the value of specific elements in a vector, for example
+\begin{verbatim}
+	\R{y[1] <- "A"}
+\end{verbatim}
+changes the first element of \verb+y+ to a capital \verb+A+.
+
+Numeric vectors can be added, subtracted, multiplied and divided.  \verb+R+ carries out these operations element-wise, meaning that the operation is applied to each element of the vector independently.  This can be both helpful and confusing because it does not conform with some operations in linear algebra\footnote{see in section \ref{sec:matrix} for linear algebra operations}.  Examples will help illuminate
+\begin{verbatim}
+	\R{my.vector <- 1:4}
+	\R{ur.vector <- 5:8}
+	\R{my.vector + 1	\# note each element is now one larger}
+	\R{my.vector*2}
+	\R{my.vector*ur.vector}
+\end{verbatim}
+In the last line, we notice that the result is four elements long, the first element corresponding to \verb+my.vector[1]*ur.vector[1]+, and the second element to \verb+my.vector[2]+ \verb+*ur.vector[2]+, and so on.  This is often the desired result, unless we wanted to take the dot product of the two vectors, that will come later.
+
+\begin{table}[!htb]
+	\begin{threeparttable}
+	\caption{Useful functions for vectors and factors}
+
+	\begin{tabular}{r l l}
+		\hline
+		Function 	&	\multicolumn{1}{c}{Arguments\tnote{a}}		&	\multicolumn{1}{c}{Output}		\\
+		\hline
+		\verb+c+		&	several values (all of the same class)	&	vector containing the given		\\
+					&									&	values						\\
+		\verb+rep+	&	\verb+x+: what will be replicated		&	vector containing the 			\\
+					&	\verb+times+: number of replicates		&	value(s) replicated				\\
+		\verb+seq+	&	many, see text						&	a vector containing the desired		\\
+					&									&	sequence						\\
+		\verb+factor+	&	a vector, typically of characters			&	a factor object with 				\\
+					&									&	alphabetically ordered levels		\\
+		\verb+levels+	&	a factor							&	a vector containing all the unique	\\
+					&									&	entries of the factor object given	\\
+		\verb+length+	&	a vector or factor					&	the number of elements			\\
+		\verb+names+	&	a vector or factor (other structures		&	the names of the object's			\\
+					&	will also work)						&	elements, or can be used to		\\
+					&									&	assign new names				\\
+		\hline
+	\end{tabular}
+	\begin{tablenotes}
+		\item[a] A complete argument list is not feasible in this space, refer to the help documentation, see section \ref{sec:help}
+	\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+
+
+\subsubsection{Factor}
+Factors are an important data structure in any factorial analysis or plotting (e.g. ANOVA and plotting the effect of given treatments).  Factors are also the default data structure \verb+R+ uses to import characters.  Much of this discussion of factors may prove more useful after we have imported data files and begun manipulating and analyzing data.  Jump to section \ref{sec:reading} to get started.
+
+Factors can be thought of as special vectors, they often appear as if they are characters (e.g. \verb+treat1, treat2, control+) but underlying those words are unique numeric identifiers (\verb+2,3,1+)\footnote{The numeric identifiers default to alphabetical order, which is important to remember if a specific ordering of factors is desired for, e.g. plotting.}.  Factors also have an additional attribute \verb+levels+ which is just a vector listing all the unique values of a given factor.  An example will help illuminate; we convert a vector of characters \verb+y+ into a factor object \verb+Y+ and explore its properties:
+\begin{verbatim}
+	\R{y <- c("a","a","b","c")	\# note "a" appears twice}
+	\R{Y <- factor(y)}
+	\R{Y	\# let's see how it looks}
+	\R{\# we explicitly access the levels with the function `levels'}
+	\R{levels(Y)	\# note "a" only appears once as it should}
+\end{verbatim}
+We can extract specific values of a factor using indices just as we did with vectors, but reassigning the values of elements is more difficult because of the \verb+levels+ attribute.  If we wanted to make the second \verb+a+ equal to \verb+b+ this would be easily done with
+\begin{verbatim}
+	\R{Y[2] <- "b"}
+\end{verbatim}
+but to make the second \verb+a+ equal to \verb+d+ (a \emph{new} value) we must first add \verb+d+ to the levels of \verb+Y+
+\begin{verbatim}
+	\R{levels(Y) <- c(levels(Y),"d")	\# combines the old levels with "d" }
+	\R{Y[2] <- "d"}
+\end{verbatim}
+
+\subsubsection{Matrix}	\label{sec:matrix}
+Matrices are simply composed of on or more vectors organized into columns and rows.  They are most easily created with the function \verb+matrix+.  As an example, suppose we wanted to create the matrix $\mathbf{M}$ in \verb+R+:
+\begin{equation*}
+	\mathbf{M} = \left(
+		\begin{array}{ccc}
+			1	&	4	&	7	\\
+			2	&	5	&	8	\\
+			3	&	6	&	9	\\
+		\end{array}
+	\right).
+\end{equation*}
+We do so with the command
+\begin{verbatim}
+	\R{M <- matrix(1:9,nrow=3,ncol=3)}
+\end{verbatim}
+\verb+matrix+ takes a vector (in this case \verb+1,2,3,...,9+) as its first argument and puts the elements of that vector into the cells of the matrix column by column.  The number of rows and columns of the matrix are specified by \verb+nrow+ and \verb+ncol+.  We can also make \verb+matrix+ fill cells of a matrix row by row.  For example, compare the above result with
+\begin{verbatim}
+	\R{M2 <- matrix(1:9,byrow=TRUE,nrow=3,ncol=3)}
+\end{verbatim}
+
+Similarly to vectors, we can use indices to extract specific elements of a matrix.  For example the very first cell (in the top left corner) of $\mathbf{M}$ can be obtained with \verb+M[1,1]+.  Note that we need two indices now separated by a comma, one for rows (the first) and one for columns (the second).  We could extract the entire first row with the command \verb+M[1, ]+, leaving the space for the column index black, or \verb+M[ ,1]+ to obtain the first column.  We could also extract the submatrix
+$
+\left(
+	\begin{array}{ccc}
+		1	&	4	\\
+		2	&	5	\\
+	\end{array}
+\right)
+$
+with the command \verb+M[1:2,1:2]+.
+
+Matrices can also be created with the function \verb+array+.  For example, matrix $\mathbf{M}$ can also be made using \verb+array(1:9,dim=c(3,3))+.  The function \verb+array+ can also be much more powerful than \verb+matrix+ because we can create multidimensional arrays, such as
+\begin{verbatim}
+	\R{array(1:8,dim=c(2,2,2))}
+\end{verbatim}
+which effectively stacks the matrix
+$
+\left(
+	\begin{array}{ccc}
+		1	&	3	\\
+		2	&	4	\\
+	\end{array}
+\right)
+$
+on top of the matrix
+$
+\left(
+	\begin{array}{ccc}
+		5	&	7	\\
+		6	&	8	\\
+	\end{array}
+\right)
+$.
+
+\begin{table}[!htb]
+	\begin{threeparttable}
+	\caption{Useful functions for matrices}
+
+	\begin{tabular}{r l l}
+		\hline
+		Function 	&	\multicolumn{1}{c}{Arguments\tnote{a}}		&	\multicolumn{1}{c}{Output}		\\
+		\hline
+		\verb+matrix+	&	\verb+x+: elements to go in matrix		&	a matrix object					\\
+					&	as a vector						&								\\
+					&	\verb+nrow+: number of rows			&								\\
+					&	\verb+ncol+: number of columns		&								\\
+		\verb+array+	&	\verb+x+: elements to go in array		&	an array object (like a matrix)		\\
+					&	\verb+dim+: vector who's entries		&	value(s) replicated				\\
+					&	specify dimensions					&								\\
+		\verb+nrow+	&	a matrix object						&	the number or rows				\\
+		\verb+ncol+	&	a matrix object						&	the number of columns			\\
+		\verb+dim+	&	a matrix object						&	a vector with element = length		\\
+					&									&	in each dimension of object		\\
+		\verb+rownames+&	a matrix object						&	the row names, or can be used		\\
+					&									&	for assigning new row names		\\
+		\verb+colnames+&	a matrix object						&	same as above but for columns	\\
+		\hline
+	\end{tabular}
+	\begin{tablenotes}
+		\item[a] A complete argument list is not feasible in this space, refer to the help documentation, see section \ref{sec:help}
+	\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+
+\subsubsection*{Optional: Matrix Algebra}
+We earlier stated that operations on vectors and matrices do not always fallow the same practice as in matrix algebra.  This is the case when we multiply two vectors, or a matrix by a vector.  Here we correct that and introduce some other commands useful to doing linear algebra in \verb+R+.
+
+Matrix multiplication is achieved with the operator \texttt{\%*\%} which is used exactly like simple \verb+*+, only it does indeed produce the dot product, or matrix multiplication.  For example, using our matrix \verb+M+ from above
+\begin{verbatim}
+	\R{x <- 1:3}
+	\R{y <- 4:6}
+	\R{M \%*\% x	\# returns a vector same length as x}
+	\R{x \%*\% y	\# returns a single number}
+\end{verbatim}
+We can take the cross product by making use the transpose function (simply \verb+t+), or with a built-in function
+\begin{verbatim}
+	\R{t(M)	\# explore transpose function}
+	\R{t(x)	\# it works on both matrices and vectors}
+	\R{t(x) \%*\% y	\# compute the cross product `x cross y'}
+	\R{crossprod(x, y)	\# or do it in one fell swoop}
+\end{verbatim}
+Lastly, we often need to find eigen values and eigen vectors in linear algebra.  This is made possible in \verb+R+ with the function \verb+eigen+
+\begin{verbatim}
+	\R{eigen.m <- eigen(M)}
+\end{verbatim}
+The function \verb+eigen+ returns a \verb+list+ (see section \ref{sec:list}) with elements \verb+values+ and \verb+vectors+.  In our above example
+\verbatiminput{eigenEG.txt}
+
+
+\subsubsection{Data Frame}	\label{sec:data.frame}
+Data frames are deceptively similar to matrices.  They contain data organized into rows and columns, however unlike matrices, data frames can contain columns of different classes (most commonly \verb+numeric+ and \verb+factor+).  Most often, we produce data frames by importing tabular data into \verb+R+, as such data are neccesaryily imported as data frames.  Hence, much of the following discussion will be more relevant after importing data files, which we do in section \ref{sec:reading}.
+
+However, we can also make data frames from vectors and matrices.  Given a matrix (for example \verb+M+ from section \ref{sec:matrix}) we can simply convert it into a data frame with the funciton \verb+as.data.frame+
+\begin{verbatim}
+	\R{M.data <- as.data.frame(M)}
+\end{verbatim}
+We can also make a data frame from component vectors, for example
+\begin{verbatim}
+	\R{spp <- c("sp1","sp2","sp3")}
+	\R{range.size <- c(400,100,600)}
+	\R{extant <- c(TRUE,FALSE,TRUE)}
+	\R{play.data <- data.frame(spp, range.size, extant)}
+\end{verbatim}
+The arguments of \verb+data.frame+ are thus seen to be the vectors that will be the columns of the data frame to be created.  Note that the column names of \verb+play.data+ are the names of the vector objects we used to compose the data frame.  If we want other names we can easily specify them, e.g.:
+\begin{verbatim}
+	\R{play.data2 <- data.frame("species" = spp, "range" = range.size)}
+\end{verbatim} 
+Now \verb+species+ and \verb+range+ are column names.
+
+Column names in data frames are very convenient, as we access different columns by their name using the \verb+$+ operator.  For example, in our \verb+play.data+ object, we can access the \verb+spp+ column like
+\begin{verbatim}
+	\R{play.data\$spp}
+\end{verbatim}
+Similarly, the \verb+range.size+ column can be access like
+\begin{verbatim}
+	\R{play.data\$range.size}
+\end{verbatim}
+
+Indices can be used to extract elements of data frames just like with matrices.  Additionally, the columns of data frames are bona fide vectors and their elements can be extracted with indices like any other vector.  For example, we could extract the very first element of the \verb+spp+ column of \verb+play.data+ in either of two ways:
+\begin{verbatim}
+	\R{play.data[1,1]  \# just like a matrix}
+	\R{\# or...}
+	\R{play.data\$spp[1]	\# just like a vector}
+\end{verbatim}
+Many other functions and operators that apply to vectors and matrices can also be used with data frames.  See Table \ref{data.frame} for a sample of various useful commands for data frames.
+
+\begin{table}[!htb]
+	\begin{threeparttable}
+	\caption{Useful functions (and one operator) for data frames}	\label{data.frame}
+
+	\begin{tabular}{r l l}
+		\hline
+		Function 	&	\multicolumn{1}{c}{Arguments\tnote{a}}	&	\multicolumn{1}{c}{Output}		\\
+		\hline
+		\verb+as.data.frame+	&	object to convert into data frame	&	a data frame object	\\
+		\verb+data.frame+		&	elements (usually vectors) to go	&	a data frame object	\\				
+							&	into data frame					&					\\
+		\verb+nrow+	&	a data fame object				&	the number of rows				\\
+		\verb+ncol+	&	a data fame object				&	the number of columns			\\
+		\verb+dim+	&	a data fame object				&	a vector with element = length		\\
+					&								&	in each dimension of object		\\
+		\verb+rownames+&	a data fame object				&	the row names, or can be used		\\
+					&								&	for assigning new row names		\\
+		\verb+colnames+&	a data fame object				&	same as above but for columns	\\
+		\verb+$+		&	operator, see text for usage		&	one extracted column, a vector		\\
+		\hline
+	\end{tabular}
+	\begin{tablenotes}
+		\item[a] A complete argument list is not feasible in this space, refer to the help documentation, see section \ref{sec:help}
+	\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+
+\subsubsection{List}	\label{sec:list}
+Lists are the most versitile data structure in \verb+R+.  Somewhat like data frames they can contain objects of different classes, but these objects are not organized into rows and columns; rather they can be thought of as a collection of objects stored together for convenience \footnote{For example, many functions that need to return several different pieces of information (e.g. test statistic, degrees of freedom, p-value, confidence interval, etc.) packages this into a list}.  For example, a list could store a vector, a matrix and a data frame all at once
+\begin{verbatim}
+	\R{my.list <- list("x" = c("my","list"), "y" = M, "z" = play.data)}
+	\R{my.list}
+\end{verbatim}
+Notice that \verb+"x"+, \verb+"y"+ and \verb+"z"+ are the names of the three elements in \verb+my.list+.  Just like columns in a data frame, we can access these different elements by their name, for example to access the vector called \verb+x+
+\begin{verbatim}
+	\R{my.list\$x}
+\end{verbatim}
+Once we've extracted one element from a list it behaves exactly as any other object of its class.  That is, \verb+my.list$x+ can be treated like any other vector, \verb+my.list$y+ can be treated like any other matrix, and so on.
+
+We can also extract multiple elements from a list using indices in the same way we can extract multiple elements from a vector.  For example, the first two elements of \verb+my.list+ can be accessed like
+\begin{verbatim}
+	\R{my.list[1:2]}
+\end{verbatim}
+Notice that the result is another list (this time with only two elements).  We can also use indices to extract single elements from a list, however, we must make \verb+R+ understand that we don't want a list containing the element indicated by our index, but instead we actually want that element itself.  To do so we use double brackets (\verb+[[+), for example to extract the first element of \verb+my.list+ we could use the command
+\begin{verbatim}
+	\R{my.list[[1]]}
+\end{verbatim}
+
+\begin{table}[!htb]
+	\begin{threeparttable}
+	\caption{Useful functions (and one operator) for lists}
+	\begin{tabular}{r l l}
+		\hline
+		Function 	&	\multicolumn{1}{c}{Arguments\tnote{a}}	&	\multicolumn{1}{c}{Output}		\\
+		\hline
+		\verb+list+		&	elements to go into list			&	a data frame object				\\
+		\verb+length+	&	a list object					&	the number of elements			\\
+		\verb+$+		&	operator, see text for usage		&	one extracted element			\\
+		\hline
+	\end{tabular}
+	\begin{tablenotes}
+		\item[a] A complete argument list is not feasible in this space, refer to the help documentation, see section \ref{sec:help}
+	\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+
+\subsection{Loading data files}		\label{sec:reading}
+There are two spread sheet file formats that \verb+R+ can read, \verb+.csv+ and \verb+.txt+, which use commas and tabs, respectively, to delimit columns. Both can be generated from an excel file.
+
+To read in files, there are two simple commands: \verb+read.csv+ and \verb+read.tabel+, which take the file directory as their primary argument. The file directory is the "path" to the file completed by the file name.  Two examples are:
+
+A file named \verb+farmers_almanac.txt+ saved on the desktop of a Mac
+\begin{verbatim}
+	Users/farmer_joe/Desktop/farmers_almanac.txt
+\end{verbatim}
+
+A file named \verb+farmers_almanac.txt+ saved on the desktop of a PC
+\begin{verbatim}
+	C:\Users\farmer_bob\Desktop\farmers_almanac.txt
+\end{verbatim}
+
+File directories can be confusing and are easy to mess up.  Two helpful strategies are to use the functions \verb+getwd()+ and \verb+setwd(...)+, or to ``copy'' the path.  \verb+getwd()+ prints the first part of the file directory (everything before \verb+Desktop+ in the examples above) which can be copied and pasted into one of the \verb+read+ functions.  \verb+setwd+ takes as its argument a path along which \verb+R+ will look for your file, so you can set the path to always be, for example, your desktop.  Copying the path is different on different operating systems.  On a Mac, one can simply ``drag'' the file into the R console, in a PC, one must write-click the file, select properties and copy the location, pasting it into \verb+R+.  PC's use back slashes in path directories, which will not work in \verb+R+ hence you will need to change any back slashes to forward slashes.
+
+Let's begin with loading the file \verb+GrasshopperAbundance.csv+ (see Table \ref{datasets}). Note that we first set the working directory to wherever the file is saved.
+\begin{verbatim}
+	\R{setwd("/Users/farmer\_joe/Desktop")	\# just an example}
+	\R{hopper.abund <- read.csv(GrasshopperAbundance.csv,header=TRUE)}
+\end{verbatim}
+\verb+read.csv+ and \verb+read.table+ have many arguments, but two particularly important ones are of course the path (without which the function cannot load anything) and the argument \verb+header+, which specifies whether the first row of the data file should be set aside as the column headers.  This is the case in \verb+GrasshopperAbundance.csv+ so we set \verb+header=TRUE+.
+
+To examine the imported data file to make sure we have not read extra rows or columns and to see that the column headers are acceptable, we can simply type \verb+hop.abund+ in the console and press enter (just like viewing any other object).  For longer imported data files (of say $>$100 rows) it is often more convenient to only view a few of the first rows, for example \verb+hop.abund[1:3, ]+.\footnote{for a refresher on subsetting and extracting with data frames, see section \ref{sec:data.frame}}
+
+\begin{table}[!htb]
+	\begin{threeparttable}
+	\caption{Useful functions for loading data}
+
+	\begin{tabular}{r l l}
+		\hline
+		Function 	&	\multicolumn{1}{c}{Arguments\tnote{a}}		&	\multicolumn{1}{c}{Output}		\\
+		\hline
+		\verb+read.csv+	&	\verb+file+: the file directory in quotes			&	\verb+data.frame+ containing data	\\
+						&	\verb+header+: should $1^{st}$ row be header		&								\\	
+		\verb+read.table+	&	\verb+file+: the file directory in quotes			&	\verb+data.frame+ containing data	\\
+						&	\verb+header+: should $1^{st}$ row be header		&								\\
+						&	\verb+sep+: the column delimiter in quotes 		&								\\
+		\verb+getwd+		&	none										&	prints the current directory		\\
+		\verb+setwd+		&	the desired directory in quotes					&	none 						\\
+		\hline
+	\end{tabular}
+	\begin{tablenotes}
+		\item[a] A complete argument list is not feasible in this space, refer to the help documentation, see section \ref{sec:help}
+	\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+
+\section{Data Manipulation}
+Under each section on data structures (\ref{sec:vector}--\ref{sec:list}), we have already discussed ways to subset and extract specific values from each data structure.  Here, we provide tools to do this in a more nuanced way.  For motivation, consider the situation in which we would like to consider only those rows of \verb+hop.abund+ (see \ref{sec:reading} and Table \ref{datasets}) for which the abundance in 2006 was greater than 200 individuals, or perhaps we only want to consider the subfamily Gomphocerinae.  Further, we might like to make a species abundance distribution which would require us to sort the rows of \verb+hop.abund+ in descending order by abundance.
+
+\subsection{Logical and Comparison Operators}
+If we would like to subset a data object based on some given condition (e.g. that abundance is greater than 200) we do so with logical operators, such as \verb+>+ and \verb+<+.  Logical operators are akin to asking a question, which \verb+R+ will answer for you.  For example we could ask \emph{Is} \verb+hop.abund$abund06+ \emph{greater than 200?}
+\begin{verbatim}
+	\R{hop.abund\$abund06 > 200}
+\end{verbatim}
+and \verb+R+ will respond
+\begin{verbatim}
+	\R{[1] FALSE FALSE FALSE FALSE FALSE ...}(20 more values)
+\end{verbatim}
+Notice that \verb+R+ responds element-wise, i.e. for each element of \verb+hop.abund$abund06 R+ returns an answer to our question: \emph{is element one greater than 200?} \verb+FALSE+, \emph{is element two greater than 200?} \verb+FALSE+, and so on, until \emph{is element eleven greater than 200?} \verb+TRUE+.
+
+There are further logical operators yet.  To ask questions about specific values, for example which elements are equal to 0, we use the double equal (\verb+==+) operator, and to find out which elements are not equal to a specific value, for example 0 again, we use the bang equal (\verb+!=+) operator
+\begin{verbatim}
+	\R{> hop.abund\$abund06 == 0}
+	\R{[1] FALSE FALSE FALSE FALSE TRUE ...}(20 more values)
+	\R{> hop.abund\$abund06 != 0}
+	\R{[1] TRUE TRUE TRUE TRUE FALSE ...}(20 more values)
+\end{verbatim}
+Double equal and bang equal also work in the case of characters and factors, for example we could use double equal to ask which elements in the subfamily column are equal to Gomphocerinae
+\begin{verbatim}
+	\R{> hop.abund\$subfamily=="Gomphocerinae"}
+	\R{[1] TRUE TRUE TRUE TRUE TRUE ...}(20 more values)
+\end{verbatim}
+
+We can use logical operators with even more versatility by simultaneously asking about several different conditions, for example is abundance greater than 200 in both 2006 AND 2007, or is abundance greater than 200 in either 2006 OR 2007.  To do so, we need a slightly more sophisticated command
+\begin{verbatim}
+	\R{\# are both greater?:}
+	\R{hop.abund\$abund06 > 200 \& hop.abund\$abund07 > 200}
+	\R{\# are either greater?:}
+	\R{hop.abund\$abund06 > 200 | hop.abund\$abund07 > 200}
+\end{verbatim}
+The \verb+&+ operator asks the ``and'' question, while the \verb+|+ operator asks the ``or'' question.
+
+While these operators are useful for asking about two to three conditions simultaneously, if we needed to test many conditions, we'd need a different operator.  Luckily one exists, \texttt{\%in\%} which asks the question \emph{are any elements in the object to the left found in the object to the right?}  For example, suppose we want to condition on several different species names
+\begin{verbatim}
+	\R{> these.names <- c("AUEL","AUFE","PSDE","PSTE","MEAR","MESA")}
+	\R{> hop.abund\$species \%in\% these.names}
+	\R{[1] FALSE FALSE TRUE TRUE FALSE ...} (20 more values)
+\end{verbatim}
+
+Lastly, the ``bang'' operator that was introduced with \verb+!=+ can also stand alone, and has the effect of reversing any boolean value, that is \verb+!TRUE+ is the same as \verb+FALSE+ and \verb+!FALSE+ is the same as \verb+TRUE+.  For example, suppose we in fact want all species \emph{except} the ones in vector \verb+these.names+
+\begin{verbatim}
+	\R{> !(hop.abund\$species \%in\% these.names)}
+	\R{[1] TRUE TRUE FALSE FALSE TRUE ...} (20 more values)
+\end{verbatim}
+
+\begin{table}[!htb]
+	\caption{Useful logical operators (and two functions)}
+	\begin{tabular}{r l l l}
+		\hline
+		Operator 		&	\multicolumn{1}{l}{Use}					&	\multicolumn{1}{c}{Example}				\\
+		\hline
+		\verb+>, <+	&	Greater or less than						&	\verb+5 > 3+			&	\verb+TRUE+	\\
+		\verb+>=, <=+	&	Greater, less than or equal to				&	\verb+5 >= 3+			&	\verb+TRUE+	\\
+		\verb+==, !=+	&	Equal to, not equal to					&	\verb+5 == 3+			&	\verb+FALSE+	\\
+		\verb+!+		&	Returns the opposite value				&	\verb+!FALSE+			&	\verb+TRUE+ 	\\
+		\texttt{\&, |}		&	Are both (\texttt{\&}) or either (\verb+|+) true	&	\texttt{5 > 3 \& 5 < 10}	&	\verb+TRUE+	\\
+		\texttt{\%in\%}	&	Are values of right hand found			 	&	\texttt{1:3 \%in\% 2:4}	&	\verb+FALSE TRUE ...+	\\
+					&	in left hand							&						&				\\
+		\verb+all, any+	&	Functions: are all or any of the  			&	\verb+any(c(TRUE, FALSE))+	&	\verb+TRUE+	\\
+					&	values true							&	\verb+all(c(TRUE, FALSE))+	&	\verb+FALSE+	\\
+		\hline
+	\end{tabular}
+\end{table}
+
+\subsection{Subsetting and extracting data (revisited)}
+We can now more powerfully subset and extract data.  Recall from section \ref{sec:vector} that we can use \verb+TRUE+ and \verb+FALSE+ values to specify which elements we wish to extract.  Hence to obtain all rows from \verb+hop.abund+ for which the 2006 abundance was greater than 200
+\begin{verbatim}
+	\R{hop.abund[hop.abund\$abund06 > 200, ]}
+\end{verbatim}
+or to obtain all rows for which abundance in 2006 and in 2007 was above 200
+\begin{verbatim}
+	\R{hop.abund[hop.abund\$abund06 > 200 \& hop.abund\$abund06 > 200, ]}
+\end{verbatim}
+This works exactly the same no matter how we produce our \verb+TRUE/FALSE+ values.  Hence, using \texttt{\%in\%} works just as well
+\begin{verbatim}
+	\R{hop.abund[hop.abund\$species \%in\% these.names, ]}
+	\R{hop.abund[!(hop.abund\$species \%in\% these.names), ]}
+\end{verbatim}
+
+\subsection{Reordering data}
+At the beginning of this section on data manipulation, we introduced the motivating example of needing to order specie abundances to eventually produce a species abundance distribution.\footnote{See section \ref{sec:plotting} for actually producing such a graphic}  This can easily be done for single vectors, such as \verb+hop.abund$abund06+ using the function \verb+sort+
+\begin{verbatim}
+	\R{sort(hop.abund\$abund06)}
+	\R{\# or to order abundance from greatest to least}
+	\R{sort(hop.abund\$abund06, decreasing = TRUE)}
+\end{verbatim}
+
+We can achieve a similar result using the function \verb+order+ which returns a vector of indices in order from the index referencing to the smallest element to the index referencing the largest element (or opposite). For example
+\begin{verbatim}
+	\R{> order(hop.abund\$abund06)}
+	\R{[1] 5 17 18 12 16 ...} (20 more values)
+\end{verbatim}
+which means that element number five is the smallest, followed by seventeen, then eighteen, and so on.  Just like with \verb+sort+ we can use the argument \verb+decreasing = TRUE+ to specify that we would like to order our vector from largest to smallest.  Because the returned vector contains indices, we can use it to reorder our vector in decreasing or increasing order
+\begin{verbatim}
+	\R{hop.abund\$abund06[order(hop.abund\$abund06)]}
+	\R{\# or in decreasing order...}
+	\R{hop.abund\$abund06[order(hop.abund\$abund06, decreasing=TRUE)]}
+\end{verbatim}
+We belabor this seeming convoluted method for sorting because, while \verb+sort+ works perfectly well for single vectors, imagine we want to sort the entire data frame \verb+hop.abund+.  For this task, the indices provided by \verb+order+ are particularly helpful.  Exactly as we ordered the single vector \verb+hop.abund$abund06+, so we can order the rows of \verb+hop.abund+
+\begin{verbatim}
+	\R{hop.abund[order(hop.abund\$abund06, decreasing=TRUE), ]}
+\end{verbatim}
+Now the data are ordered by the 2006 abundances, and we could make two abundance distribution plots, one for 2006 and one for 2007, with the ordering of species exactly the same in both.  This is very convenient for, say, comparing community composition between the two years.
+
+One last reordering challenge is often encountered in data analysis. Suppose we have another data set with some of the same species as are in \verb+hop.abund+ but they are not in the same order.  For example, suppose we enter by hand some data on body mass for three of our grasshopper species
+\begin{verbatim}
+	\R{spp.name <- c("AGDE", "HATR", "MESA")}
+	\R{spp.mass <- c( 3.32, 7.03, 5.20)}
+	\R{hop.mass <- data.frame("spp" = spp.name, "mass" = spp.mass)}
+\end{verbatim}
+This data frame looks like
+\begin{equation*}
+	\begin{array}{lrr}
+				& 	\verb+spp+	&	\verb+mass+	\\
+		\verb+1+	&	\verb+AGDE+	&	\verb+3.32+	\\
+		\verb+2+	&	\verb+HATR+	&	\verb+7.03+	\\
+		\verb+3+	&	\verb+MESA+	&	\verb+5.20+	\\
+	\end{array}
+\end{equation*}
+Now we'd like to be able to associate each species' mass with its abundance.  For such a trivial example we could easily do this by hand, but eventually we'll need to know how to automate such a task.  We do so with the function \verb+match+ which \emph{matches} the values in its first argument with those in its second, and returns the appropriate indices
+\begin{verbatim}
+	\R{> match(hop.mass\$spp, hop.abund\$species)}
+	\R{[1] 1 8 25}
+\end{verbatim}
+This means that we can find data for AGDE in the first row of \verb+hop.abund+, for HATR in the eight row, and so on.  So to get the 2006 abundance for these species we simply type
+\begin{verbatim}
+	\R{hop.abund\$abund06[match(hop.mass\$spp, hop.abund\$species)]}
+\end{verbatim}
+and we can even put it all in one data frame using the function \verb+cbind+
+\begin{verbatim}
+	\R{cbind(hop.mass,}
+	\R{"abund06" = hop.abund\$abund06[match(hop.mass\$spp, hop.abund\$species)])}
+\end{verbatim}
+This example is rather trivial, but reordering data by something like species name becomes particularly important in phylogenetic inference in which it is highly unlikely that the order of taxon names in the phylogenetic tree object matches their names in the data object.  Hence we must reorder the data object before we can study the data in the context of the phylogeny.
+
+
+\section{Basic Statistical Functions}
+Now that we have covered the basics of data structures, importation, and manipulation, we can finally more on to the much more gratifying topic of preforming actual statistical analyses of our data.  Unfortunately, it is beyond the scope of this tutorial to detail all the mathematical underpinnings of every statistical procedure addressed.  While we will attempt to address which statistical procedures are applicable for which kinds of data, we focus on implementation and leave the details to other sources.
+
+To thoroughly explore the statistical functions of \verb+R+ we will need to import several more data files.  We do that now so as not to muddle the computations down stream.  Refer to Table \ref{datasets} for the details of each data file, including meanings of columns, and to section \ref{sec:reading} for details on importing files.  Recall that we have set our working directory to be the desktop, hence we import like
+\begin{verbatim}
+	\R{hop.distdecay <- read.csv("grasshopperDistanceDecay.csv", header=TRUE)}
+	\R{hop.feeding <- read.csv("grasshopperFeeding.csv", header=TRUE)}
+\end{verbatim}
+
+\subsection{Formula Syntax}
+We begin by addressing the typical syntax for indicating the dependent and independent (i.e. response and ``treatment'') variables in a test.  Often we think of \emph{y} as dependent upon \emph{x}; that is, we manipulate some variable \emph{x} and measure the response \emph{y}.  Often times in ecology and evolution, \emph{x} is actually something that we have let nature vary---it is varying temperatures measured across latitude or though geologic time, or it may be the geographic distance between sampling points.  All the same, we consider \emph{x} to be the explanatory, independent variable.  The way we communicate this to \verb+R+ is with the tilde
+\begin{verbatim}
+	\R{y\~{}x}
+\end{verbatim}
+which literally means \emph{y} dependent on \emph{x}, or \emph{y} as a function of \emph{x}.  This is the syntax for everything from t-tests to factorial ANOVA to regression.  We will discuss all these and more in the coming sections.  We will also point out the few cases in which formula syntax is not used.
+
+\subsection{Assessing normality}	\label{sec:normTest}
+Many statistical tests require that our data be normally distributed.  Hence, before launching into the details of these tests, we must first gain an understanding of how we can assess the normality of our data.  The simplest (though non-quantitative) way to do this is with \verb+qqnorm(x)+, where \verb+x+ is our data in the form of a single vector, which compares the quantiles of our data with those of a standard normal distribution (i.e. $\mu$ = 0, $\sigma^2$ = 1; see Fig. \ref{qqplot}).
+
+\begin{figure}[!hbt]
+	\centering
+	\includegraphics[scale=0.8]{qqplot_eg}
+	\caption[Example QQ plots]{Example QQ plots.  Each plot shows different general deviations from normality. A: less kurtosis; B: fat tails; C: skew right; D: skew left.  In all 						    cases, the alternating gray and white bars represent quantiles, and the standard normal is on the x-axis}
+	\label{qqplot}
+\end{figure}
+
+Hence, if our data are normal, \verb+qqnorm(x)+ will produce a strait line, and if our data our systematically biased away from normal, the plot from \verb+qqnorm(x)+ will appear in some way curved as per Figure \ref{qqplot}.
+
+The alternative, quantitative, possibility is to conduct a formal test of normality.  Many exist, however, the Shapiro--Wilk test is a strong contender and easily implemented in \verb+R+.\footnote{The more rigorous Anderson--Darling test is implemented in the package \texttt{`nortest'} as function \texttt{ad.test}}  To execute a Shapiro--Wilk test of normality, we simply use the command \verb+shapiro.test(x)+, where \verb+x+ is our data just like in \verb+qqnorm(x)+.  If the \emph{p}-value is greater than 0.05 we accept the null hypothesis that our data were drawn from a normal distribution.  Such rigorous tests of normality are often not necessary, as symmetry about the mean is often sufficient to produce meaningful test statistics.
+
+\subsection{Two-way comparison of distributions}
+One of the most common statistical tasks seems to be comparing two means, or comparing one mean to a specific value (most often 0).  We ask the question, \emph{Are the means of these two distributions significantly different?} or, \emph{Is the mean of this one distribution different from 0?}.  We typically achieve this with a Student's t-test.
+
+\subsubsection{Student's t-test}	\label{sec:tTest}
+Let's use the \verb+hop.distdecay+ data set to see if there is any difference in average community similarity between the two transect types, ``distance'' (\verb+d+), and ``elevation'' (\verb+e+).  The vector \verb+hop.distdecay$tran+ contains the transect types, and vector \verb+hop.distdecay$sim+ contains the similarities.  We begin by testing normality
+\begin{verbatim}
+	\R{\# first for the elevation points}
+	\R{qqnorm(hop.distdecay\$sim[hop.distdecay\$tran=="e"])}
+	\R{\# now for the distance points}
+	\R{qqnorm(hop.distdecay\$sim[hop.distdecay\$tran=="d"])}
+\end{verbatim}
+We observe that the elevation transect appears to be slightly right skewed, but proceed with the exam, for demonstrative purposes if no other.  By default \verb+R+ will evaluate the variances of both distributions and if they are not equal it will apply Welch's correction to the degrees of freedom.  Hence, we often observe a non-integer degrees of freedom.
+\begin{quote}
+	\verbatiminput{t_test_eg.txt}
+\end{quote}
+This is the default output for a t-test, which nicely summarizes all output of interest including test statistic, degrees of freedom and \emph{p}-value.  However, often we need to extract one or several of these values separately.  Luckily, because \verb+t.test+ actually produces a list, we can extract any information we want with the \verb+$+ operator.  For example:
+\begin{verbatim}
+	\R{> our.t.test <- t.test(hop.distdecay\$sim~hop.distdecay\$tran)}
+	\R{> names(our.t.test) \# to learn which names hold the desired info}
+	\R{[1] "statistic"   "parameter"   "p.value"     "conf.int" ...} (5 more)
+	\R{> our.t.test\$p.value  \#for the p-value}
+	\R{[1]  8.351836e-08}
+	\R{> our.t.test\$conf.int  \# for the confidence interval}
+	\R{[1] 0.1338735 0.2706742}
+\end{verbatim}
+Function \verb+t.test+ has several other arguments worth noting, including \verb+paired+ (default \verb+FALSE+) which can be set equal to \verb+TRUE+ to preform a paired t-test, and \verb+conf.level+ which defaults to 0.05 but can be set to another value and determines the limits of the returned confidence interval.  For example if a 99\% confidence interval is desired we set \verb+conf.level = 0.01+.  We can also suppress Welch's correction by setting \verb+var.equal = TRUE+.  Lastly, if our data are organized in two separate vectors using formula syntax is difficult, and so \verb+t.test+ will allow us to enter two vectors (\verb+x+ and \verb+y+) which will be compared
+\begin{verbatim}
+	\R{t.test(x = hop.distdecay\$sim[hop.distdecay\$tran=="e"],}
+	\R{y =  hop.distdecay\$sim[hop.distdecay\$tran=="e"])}
+\end{verbatim}
+
+\subsubsection{Wilcoxon rank test}
+Because our QQ plot showed slight right skewness perhaps we should in fact not use a parametric test.  A common non-parametric alternative to the t-test is the Wilcoxon rank test (also known as the Mann-Whitney test) which first ranks our data and then determines if one sample has significantly higher ranks than the other.  Thus, this test can be viewed as evaluating whether there is a non-zero shift in central tendency of the two samples.  We execute it in \verb+R+ with the function \verb+wilcox.test+
+\begin{quote}
+	\verbatiminput{wilcox_eg.txt}
+\end{quote}
+The warning message simply means that there were ties in the data.  It is up to the investigator to determine if such ties are detrimental to the result.  In this case with such a small \emph{p}-value combined with a large N (most of which are not tied) we can be relatively sure our result is sound.  Like the result from \verb+t.test+ the output of \verb+wilcox.test+ is actually a list, and we can access all the values using the \verb+$+ operator just like before.  Paired Wilcoxon tests are also possible; we must take the difference (i.e. subtract) the two vectors of interest and preform a one sample Wilcoxon test.
+
+\subsection{Analysis of Variance}	\label{sec:anova}
+Another common task is to compare multiple (3+) samples at once.  For this we employ an analysis of variance (ANOVA).  
+
+\subsubsection{Parametric ANOVA}
+The simplest case is a one-way analysis in which we compare one ``factor''\footnote{Note: this is not a \texttt{factor} in the computing sense} with multiple groups, for example comparing some trait of several different species.  The ``factor'' is taxonomic, and the groups are all the different species.  We could compare the dietary preference of different grasshopper species in the \verb+hop.feeding+ data using ANOVA.  Let's choose to quantify dietary preference as the difference between amount eaten of the two grass species (see Table \ref{datasets} for details on the columns of \verb+hop.feeding+).  We conduct an ANOVA with the function \verb+aov+ and for reasons that will become apparent, we store the output of this analysis under a name of our choosing
+\begin{verbatim}
+	\R{\# first calculate diet preference as difference in amount eaten}
+	\R{hop.diet <- hop.feeding\$blue.herb - hop.feeding\$black.herb}
+	\R{our.aov <- aov(hop.diet \~{} hop.feeding\$species)}
+\end{verbatim}
+We assign our ANOVA to an object because \verb+R+ does not provide a nice display of the results like it did for \verb+t.test+ and \verb+wilcox.test+.  Hence we must specifically ask for the results to be summarized with the simple function \verb+summary+
+\begin{quote}
+	\verbatiminput{aov_eg.txt}
+\end{quote}
+Function \verb+aov+ also does return a list like \verb+t.test+ and \verb+wilcox.test+ so we can also extract specific values with the \verb+$+ operator.  To see all the different values we can extract, us the \verb+names+ function, like \verb+names(our.aov)+.
+
+We did not check for normality as we did before executing \verb+t.test+ because the results from \verb+aov+ can actually be plotted very simply to check that no assumptions have been violated.  We do so simply by typing
+\begin{verbatim}
+	\R{plot(our.aov)}
+\end{verbatim}
+and the results are presented in Figure \ref{aovPlot}.  Because there is no trend in the residuals, and the QQ plot appears relatively strait, we can feel comfortable with doing a parametric test on these data.
+
+\begin{figure}[!hbt]
+	\centering
+	\includegraphics[scale=0.8]{aov_plot}
+	\caption[Plot of ANOVA output]{Plot of ANOVA output.  The two plots of particular interest for checking that no assumptions have been violated are the Residuals vs Fitted plot, and the Q-Q Normal plot.  If no assumptions are violated, the residuals should fall along a flat line (potentially with spread), and the QQ plot should show a strait diagonal line (see section \ref{sec:normTest} and Figure \ref{qqplot}).}
+	\label{aovPlot}
+\end{figure}
+
+We can also preform a post-hoc test to determine which species is/are driving this pattern.  We do so most simply with the Tukey post-hoc test
+\begin{quote}
+	\verbatiminput{aov_eg.txt}
+\end{quote}
+This shows that PSDE is significantly different from the other two species (note the \emph{p}-values).  We are also given confidence intervals on the difference in mean for each comparison, which corroborate the \emph{p}-values.
+
+ANOVA can be much more powerful.  We defer much more detailed exploration to the section on more advanced statistics (section \ref{sec:notbasic}).  We will, however, demonstrate a two-way ANOVA which deals with multiple factors.  Previously we analyzed the difference in community similarity between distance and elevation transects (section \ref{sec:tTest}).  We ignored any possible effect of transect replicate (column \verb+hop.distdecay$rep+, see Table \ref{datasets}) on community similarity.
+
+\subsubsection{Kruskal-Wailis test}
+While in this example, if we felt that the assumptions of parametric ANOVA were violated, we could instead opt for the non-parametric Kruskal-Wailis test, which is an extension of the rank test for comparing two samples, but can compare multiple samples at once.  We do so with very similar syntax
+\begin{verbatim}
+	\R{our.kruskal <- kruskal.test(hop.diet~hop.feeding\$species)}
+	\R{summary(our.kruskal)}
+\end{verbatim}
+The result is again a list which we must summarize.  There is no pre-defined means of conducting a post-hoc analysis.  One option would be to conduct individual Wilcoxon rank test for each pairwise comparison and then correct for multiple comparisons.
+
+
+
+\subsection{Regression}
+\verb+lm, glm+
+\\
+\verb+anova+
+
+\subsection{Frequencies and Ratios}
+\verb+chisq.test, fisher.test+
+
+\subsection{Common Probability Distributions}		\label{sec:distrib}
+\begin{verbatim}
+	dnorm
+	dt
+	df
+	dqhisq
+\end{verbatim}
+
+
+\section{Graphics}	\label{sec:plotting}
+\section{Simulation and Permutation}	\label{sec:notbasic}
+\section{Phylogenetics}	\label{sec:phylo}
+
+\subsection{Phylogenetic Data Structures in R}
+
+\subsection{Constructing Phylogenies in R}
+
+\subsection{Phylogenetic Analyses}
+
+\section{GIS...R Style}	\label{sec:geo}
+
+\subsection{Geographic Data Structures}
+
+\end{document}  
