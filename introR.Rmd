@@ -1,0 +1,19 @@
+---
+title: "An Introduction to `R` with Examples from Ecology and Evolution"
+author: "Andy Rominger"
+date: "`r Sys.Date()`"
+output: 
+    pdf_document:
+        toc: true
+        number_sections: true
+---
+
+<!-- \clearpage -->
+
+# Getting Started
+
+## What to expect in this tutorial
+
+This tutorial aims to take a user who has never used `R` to a level of proficiency sufficient to preform many basic analytical tasks, such as importing data, manipulating data and extracting useful information from data stored in `R`, conducting basic statistical tests, and plotting data.  Once these tasks have been mastered, it is hoped that a user can further explore through this tutorial how to conduct more complicate statistical procedures, analyze phylogenetic data, and harness geo-spatial data to use in other analyses.  This tutorial makes use of several data sets which we summarize in Table 1.  In order to follow examples, it is advisable to first download these data.  See Section \ref{sec:stuff}
+
+## Other stuff \label{sec:stuff}
