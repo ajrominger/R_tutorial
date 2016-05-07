@@ -8,12 +8,1109 @@ output:
         number_sections: true
 ---
 
-<!-- \clearpage -->
-
 # Getting Started
 
 ## What to expect in this tutorial
 
-This tutorial aims to take a user who has never used `R` to a level of proficiency sufficient to preform many basic analytical tasks, such as importing data, manipulating data and extracting useful information from data stored in `R`, conducting basic statistical tests, and plotting data.  Once these tasks have been mastered, it is hoped that a user can further explore through this tutorial how to conduct more complicate statistical procedures, analyze phylogenetic data, and harness geo-spatial data to use in other analyses.  This tutorial makes use of several data sets which we summarize in Table 1.  In order to follow examples, it is advisable to first download these data.  See Section \ref{sec:stuff}
+This tutorial hopes to take a user who has never used `R` to a level of
+proficiency sufficient to preform many basic analytical tasks, such as
+importing data, manipulating data and extracting useful information from
+data stored in `R`, conducting basic statistical tests, and plotting
+data. Once these tasks have been mastered, it is hoped that a user can
+further explore through this tutorial how to conduct more complicate
+statistical procedures, analyze phylogenetic data, and harness
+geo-spatial data to use in other analyses. This tutorial makes use of
+several data sets which we summarize in Table [datasets]. In order to
+follow examples, it is advisable to first download these data.
 
-## Other stuff \label{sec:stuff}
+This tutorial is aimed primarily at the computational side of ecological
+and evolutionary data analysis. Hence, while some explanation will be
+given for statistical inference techniques, a deeper understanding must
+be sought elsewhere.
+
+                 File name               
+  ------------------------ ------------- ----------------------------
+    `GrasshopperAbundance` `subfamily`   Grasshopper subfamily
+                           `species`     Grasshopper species
+                           `abund06`     Recorded abundance in 2006
+                           `abund07`     Recorded abundance in 2007
+
+  : Data sets used in this tutorial<span data-label="datasets"></span>
+
+## Installing R
+
+Go to [www.r-project.org](url).
+
+In the side bar, click the CRAN link (under Download). This will direct
+you to a list of mirrors from which you can select a near-by host. Click
+the mirror link and then click on your appropriate OS. Follow the
+download instructions.
+
+Further packages can be installed within the `R` environment using the
+`Packages &` `Data` pulldown, or using the function `install.packages`.
+`Packages & Data` allows you to search for packages and then install
+them. To use the function `install.packages` type directly into the
+console `install.packages("package")` where `package` is the name of the
+desired package. To then load the package into your current workspace,
+use the command `library(package)` or `require(package)`. Section
+[sec:commands] on commands in `R` will explain functions, and sections
+[sec:phylo] and [sec:geo] on phylogenetics and geographic data will
+provide examples of using auxiliary packages.
+
+              Function                            
+  -------------------- -------------------------- -----------------------------
+    `install.packages` package name in quotes     imports the desired package
+             `library` package name (no quotes)   loads package into memory
+             `require` same as above              same as above
+
+  : Useful functions for import and set-up
+
+
+## Using commands in `R` {#sec:commands}
+
+Whatever the task to be completed in `R`, we do so using commands. Commands are given using
+operators (e.g. `*,/,+,-`) or functions (e.g. `mean(data)`). Most
+functions take arguments, which the user specifies, and which control
+how or what the function computes. Let's consider an example. Suppose we
+want to produce 10 random numbers drawn from a normal distribution with
+mean = 1 and variance = 4. We do so with the command
+```{r}
+rnorm(n=10, mean=1, sd=2)
+```
+
+Here the function is `rnorm` and the arguments are `n`, which specifies
+how many numbers we want to draw, `mean`, which specifies the mean, and
+`sd`, which specifies the standard deviation, i.e. the square root of
+the variance. For more on drawing samples from probability distributions
+see section [sec:distrib].
+
+## Getting help {#sec:help}
+
+No one can know the arguments of functions intuitively. To learn more
+about functions, there help pages, which we can find with the question
+mark (`?`). For example `?rnorm` provides us with information about the use of the function, its
+arguments, the details underlying its computation and its output (i.e.
+value) and, most help pages provide examples.
+
+If we don't know the desired function there are many resources online.
+Providing Google with keywords such as "r sample normal distribution" or
+perhaps "r-project sample normal distribution" will typically produce an
+answer to "which function should I use?" `R` also provides built-in search options using keywords, accessed by a double question mark (`??`).  For example `??normal` searches all `R` help pages for anything with "normal" as a keyword.
+
+## Assigning objects in R
+
+Suppose we wanted to store a sample of 10 random normal numbers, rather than just print it to the screen as we did in the previous example. To do so we must
+tell `R` what name to store those values under, let's use the name `my.norm`.
+```{r}
+my.norm <- rnorm(n=10, mean=1, sd=2)
+```
+This is called "assignment" and we would say "assign 10 random normal values to an object named `my.norm`." It uses a special assignment operator `<-`; it is equivilant to use an equal sign `=`, but the special assignment operator is prefered in `R`.
+
+By again typing `my.norm` (and running it) we print those 10
+numbers; note they will be different from the previous example because those were two different samples form `R`'s normal random number generator
+```{r}
+my.norm
+```
+Now that these values are stored in the object `my.norm` we can use them for any ruther computation, for example, simple addition
+```{r}
+my.norm + 2
+```
+Let's assign that to a new object
+```{r}
+my.norm2 <- my.norm + 2
+my.norm2
+```
+
+For the sake of really making this clear, let's recap: we made this object with the "assign" operator, i.e. the `<-`
+symbol, which means "assign what's on the right-hand-side to what's on
+the left-hand-side." `R` will also let you use `=` for this purpose, but
+it is good etiquette to reserve the assig operator `<-` for assigning values to objects and only use the equal operator `=` for specifying arguments in functions (see Table [basicOperators]).
+
+           Command                                              
+  ---------------- -------------------------------------------- -------------------
+              `<-` Assignment of value to object memory         `x <- 5,`
+               `=` Specifies values of arguments in functions   `rnorm(n=10)`
+         `+ - * /` Preforms addition, subtraction, etc.         `4 + 3`
+               `^` Raises a number to a power                   `2^2`
+             `exp` Raise $e$ to a power                         `exp(0), exp(1),`
+                                                                `exp(2)`
+            `sqrt` takes square root                            `sqrt(4)`
+    `mean, median` computes mean, median, etc.                  `mean(y), sd(y)`
+         `var, sd`                                              
+
+  : Basic operators and arithmetic functions. Many functions can be used with much finesse, which we can't summarize here. Consult the help pages, see section [sec:help].<span data-label="basicOperators"></span>
+
+
+## A note on objects and classes in R
+
+`R` is an object-oriented programming language, meaing it operates on objects (values which we've assigned a name to in memory) and those objects additionally are automaticallly characterized by their class. Not knowing the details of what that means is not a major
+limitation; however it is helpful to have a basic understanding. All
+objects belong to a class and this class identity
+determines what can be done to or with a given object. A silly abstract
+example is the difference between an object that is of class `wall` and
+an object that is of class `human`. You can talk to a human, but you
+shouldn't talk to a wall. Similarly, a human can be used to build a wall
+(perhaps using some function `build.wall(method='human')`), but no function
+can use a wall to build a human. `R` has a huge number classes and we'll learn some key ones as we go. Some examples are `numeric`, which is the class
+of our `my.norm` object, and `data.frame`, which is the class of spread
+sheet like objects in `R` and the default class for any data read into
+`R` using `read.csv` or `read.table` (see section [sec:reading]).
+
+## Data structures in R
+
+Before going any further we summarize some important structures pertaining to working with your data in `R`.
+
+### Vector {#sec:vector}
+
+This is the most basic data structure. A vector can be composed of
+numbers (class `numeric` or `integer`), characters (class `character`), or booleans (`TRUE`/`FALSE`
+values; class `logical`). Vectors can be created using various functions, for example we
+create a vector of three zeros in four different ways:
+```{r}
+x1 <- c(0, 0, 0)
+x2 <- rep(0, times = 3)
+x3 <- numeric(length=3)
+x4 <- vector(mode = "numeric", length = 3)
+```
+The `c` function can also be conveniently used to create vectors of
+unique numbers, characters and booleans, for example:
+```{r}
+x <- c(1, 2.3, 3.1)
+y <- c("a", "b", "c")
+z <- c(TRUE, TRUE, FALSE)
+```
+To determine the number of elements in a vector, we use the function
+`length`
+```{r}
+length(x)
+```
+
+We can also easily make vectors of consecutive integers using a colon
+```{r}
+x.seq <- 1:4
+x.seq
+```
+
+Similarly, we could use the `seq` function, which can also be used to
+make more complicated sequences of numbers
+```{r}
+x.seq <- seq(from=1, to=4)
+x.seq
+x.seq1 <- seq(from=1, to=4, by=0.2)
+x.seq1
+x.seq2 <- seq(from=1, by=0.2, length.out=16)
+x.seq2
+```
+
+Vectors are commonly used in `R` functions,
+such as in conducting a t-test (testing the means of two
+*vectors*) or in plotting data points (plotting two
+*vectors* in a Cartesian coordinate system).
+
+We can access different parts (i.e. "elements") of a vector using
+indices set off by square brackets `[ ]`. For example, suppose we wanted
+only the second element of the vector `x` (recall that the values of `x` are \texttt{`r x`}), we would simply type:
+```{r}
+x[2]
+```
+We can also use multiple indices to extract multiple elements of a vector
+```{r}
+x[1:2]
+x[c(1, 3)]
+```
+We could equally well use `TRUE`'s and `FALSE`'s to indicate which
+elements we desire (recall the vector `z` composed of the booleans \texttt{`r z`}):
+```{r}
+x[z]
+```
+In this case we've extracted every value of `x` for which `z` is `TRUE`.
+
+We can also use indices to help us change the value of specific elements
+in a vector, for example we can change the first element of `y` to a capital `A`.
+```{r}
+y
+y[1] <- "A"
+y
+```
+
+Numeric vectors can be added, subtracted, multiplied and divided[^1a]. `R`
+carries out these operations element-wise, meaning that the operation is
+applied to each element of the vector independently. This can be both
+helpful and confusing because it does not conform with some operations
+in linear algebra[^1b]. Examples will help illuminate
+```{r}
+my.vector <- 1:4
+ur.vector <- 5:8
+my.vector + 1
+my.vector * 2
+my.vector * ur.vector
+```
+In the last line, we notice that the result is four elements long, the
+first element corresponding to `my.vector[1]*ur.vector[1]`, and the
+second element to `my.vector[2]` `*ur.vector[2]`, and so on. This is
+often the desired result, unless we wanted to take the dot product of
+the two vectors, that will come later.
+
+    Function                                          
+  ---------- ---------------------------------------- ------------------------------------
+         `c` several values (all of the same class)   vector containing the given
+                                                      values
+       `rep` `x`: what will be replicated             vector containing the
+             `times`: number of replicates            value(s) replicated
+       `seq` many, see text                           a vector containing the desired
+                                                      sequence
+    `factor` a vector, typically of characters        a factor object with
+                                                      alphabetically ordered levels
+    `levels` a factor                                 a vector containing all the unique
+                                                      entries of the factor object given
+    `length` a vector or factor                       the number of elements
+     `names` a vector or factor (other structures     the names of the object's
+             will also work)                          elements, or can be used to
+                                                      assign new names
+
+  : Useful functions for vectors and factors
+
+A complete argument list is not feasible in this space, refer to the
+help documentation, see section [sec:help]
+
+<!--
+
+### Factor
+
+Factors are an important data structure in any factorial analysis or
+plotting (e.g. ANOVA and plotting the effect of given treatments).
+Factors are also the default data structure `R` uses to import
+characters. Much of this discussion of factors may prove more useful
+after we have imported data files and begun manipulating and analyzing
+data. Jump to section [sec:reading] to get started.
+
+Factors can be thought of as special vectors, they often appear as if
+they are characters (e.g. `treat1, treat2, control`) but underlying
+those words are unique numeric identifiers (`2,3,1`)[^2]. Factors also
+have an additional attribute `levels` which is just a vector listing all
+the unique values of a given factor. An example will help illuminate; we
+convert a vector of characters `y` into a factor object `Y` and explore
+its properties:
+
+        \R{y <- c("a","a","b","c")  \# note "a" appears twice}
+        \R{Y <- factor(y)}
+        \R{Y    \# let's see how it looks}
+        \R{\# we explicitly access the levels with the function `levels'}
+        \R{levels(Y)    \# note "a" only appears once as it should}
+
+We can extract specific values of a factor using indices just as we did
+with vectors, but reassigning the values of elements is more difficult
+because of the `levels` attribute. If we wanted to make the second `a`
+equal to `b` this would be easily done with
+
+        \R{Y[2] <- "b"}
+
+but to make the second `a` equal to `d` (a *new* value) we must first
+add `d` to the levels of `Y`
+
+        \R{levels(Y) <- c(levels(Y),"d")    \# combines the old levels with "d" }
+        \R{Y[2] <- "d"}
+
+### Matrix {#sec:matrix}
+
+Matrices are simply composed of on or more vectors organized into
+columns and rows. They are most easily created with the function
+`matrix`. As an example, suppose we wanted to create the matrix
+$\mathbf{M}$ in `R`: $$\mathbf{M} = \left(
+        \begin{array}{ccc}
+            1   &   4   &   7   \\
+            2   &   5   &   8   \\
+            3   &   6   &   9   \\
+        \end{array}
+    \right).$$ We do so with the command
+
+        \R{M <- matrix(1:9,nrow=3,ncol=3)}
+
+`matrix` takes a vector (in this case `1,2,3,...,9`) as its first
+argument and puts the elements of that vector into the cells of the
+matrix column by column. The number of rows and columns of the matrix
+are specified by `nrow` and `ncol`. We can also make `matrix` fill cells
+of a matrix row by row. For example, compare the above result with
+
+        \R{M2 <- matrix(1:9,byrow=TRUE,nrow=3,ncol=3)}
+
+Similarly to vectors, we can use indices to extract specific elements of
+a matrix. For example the very first cell (in the top left corner) of
+$\mathbf{M}$ can be obtained with `M[1,1]`. Note that we need two
+indices now separated by a comma, one for rows (the first) and one for
+columns (the second). We could extract the entire first row with the
+command `M[1, ]`, leaving the space for the column index black, or
+`M[ ,1]` to obtain the first column. We could also extract the submatrix
+$
+\left(
+    \begin{array}{ccc}
+        1   &   4   \\
+        2   &   5   \\
+    \end{array}
+\right)
+$ with the command `M[1:2,1:2]`.
+
+Matrices can also be created with the function `array`. For example,
+matrix $\mathbf{M}$ can also be made using `array(1:9,dim=c(3,3))`. The
+function `array` can also be much more powerful than `matrix` because we
+can create multidimensional arrays, such as
+
+        \R{array(1:8,dim=c(2,2,2))}
+
+which effectively stacks the matrix $
+\left(
+    \begin{array}{ccc}
+        1   &   3   \\
+        2   &   4   \\
+    \end{array}
+\right)
+$ on top of the matrix $
+\left(
+    \begin{array}{ccc}
+        5   &   7   \\
+        6   &   8   \\
+    \end{array}
+\right)
+$.
+
+      Function                                 
+  ------------ ------------------------------- ---------------------------------
+      `matrix` `x`: elements to go in matrix   a matrix object
+               as a vector                     
+               `nrow`: number of rows          
+               `ncol`: number of columns       
+       `array` `x`: elements to go in array    an array object (like a matrix)
+               `dim`: vector who's entries     value(s) replicated
+               specify dimensions              
+        `nrow` a matrix object                 the number or rows
+        `ncol` a matrix object                 the number of columns
+         `dim` a matrix object                 a vector with element = length
+                                               in each dimension of object
+    `rownames` a matrix object                 the row names, or can be used
+                                               for assigning new row names
+    `colnames` a matrix object                 same as above but for columns
+
+  : Useful functions for matrices
+
+A complete argument list is not feasible in this space, refer to the
+help documentation, see section [sec:help]
+
+### Optional: Matrix Algebra {#optional-matrix-algebra .unnumbered}
+
+We earlier stated that operations on vectors and matrices do not always
+fallow the same practice as in matrix algebra. This is the case when we
+multiply two vectors, or a matrix by a vector. Here we correct that and
+introduce some other commands useful to doing linear algebra in `R`.
+
+Matrix multiplication is achieved with the operator `%%` which is used
+exactly like simple `*`, only it does indeed produce the dot product, or
+matrix multiplication. For example, using our matrix `M` from above
+
+        \R{x <- 1:3}
+        \R{y <- 4:6}
+        \R{M \%*\% x    \# returns a vector same length as x}
+        \R{x \%*\% y    \# returns a single number}
+
+We can take the cross product by making use the transpose function
+(simply `t`), or with a built-in function
+
+        \R{t(M) \# explore transpose function}
+        \R{t(x) \# it works on both matrices and vectors}
+        \R{t(x) \%*\% y \# compute the cross product `x cross y'}
+        \R{crossprod(x, y)  \# or do it in one fell swoop}
+
+Lastly, we often need to find eigen values and eigen vectors in linear
+algebra. This is made possible in `R` with the function `eigen`
+
+        \R{eigen.m <- eigen(M)}
+
+The function `eigen` returns a `list` (see section [sec:list]) with
+elements `values` and `vectors`. In our above example
+
+### Data Frame {#sec:data.frame}
+
+Data frames are deceptively similar to matrices. They contain data
+organized into rows and columns, however unlike matrices, data frames
+can contain columns of different classes (most commonly `numeric` and
+`factor`). Most often, we produce data frames by importing tabular data
+into `R`, as such data are neccesaryily imported as data frames. Hence,
+much of the following discussion will be more relevant after importing
+data files, which we do in section [sec:reading].
+
+However, we can also make data frames from vectors and matrices. Given a
+matrix (for example `M` from section [sec:matrix]) we can simply convert
+it into a data frame with the funciton `as.data.frame`
+
+        \R{M.data <- as.data.frame(M)}
+
+We can also make a data frame from component vectors, for example
+
+        \R{spp <- c("sp1","sp2","sp3")}
+        \R{range.size <- c(400,100,600)}
+        \R{extant <- c(TRUE,FALSE,TRUE)}
+        \R{play.data <- data.frame(spp, range.size, extant)}
+
+The arguments of `data.frame` are thus seen to be the vectors that will
+be the columns of the data frame to be created. Note that the column
+names of `play.data` are the names of the vector objects we used to
+compose the data frame. If we want other names we can easily specify
+them, e.g.:
+
+        \R{play.data2 <- data.frame("species" = spp, "range" = range.size)}
+
+Now `species` and `range` are column names.
+
+Column names in data frames are very convenient, as we access different
+columns by their name using the `$` operator. For example, in our
+`play.data` object, we can access the `spp` column like
+
+        \R{play.data\$spp}
+
+Similarly, the `range.size` column can be access like
+
+        \R{play.data\$range.size}
+
+Indices can be used to extract elements of data frames just like with
+matrices. Additionally, the columns of data frames are bona fide vectors
+and their elements can be extracted with indices like any other vector.
+For example, we could extract the very first element of the `spp` column
+of `play.data` in either of two ways:
+
+        \R{play.data[1,1]  \# just like a matrix}
+        \R{\# or...}
+        \R{play.data\$spp[1]    \# just like a vector}
+
+Many other functions and operators that apply to vectors and matrices
+can also be used with data frames. See Table [data.frame] for a sample
+of various useful commands for data frames.
+
+           Function                                     
+  ----------------- ----------------------------------- --------------------------------
+    `as.data.frame` object to convert into data frame   a data frame object
+       `data.frame` elements (usually vectors) to go    a data frame object
+                    into data frame                     
+             `nrow` a data fame object                  the number of rows
+             `ncol` a data fame object                  the number of columns
+              `dim` a data fame object                  a vector with element = length
+                                                        in each dimension of object
+         `rownames` a data fame object                  the row names, or can be used
+                                                        for assigning new row names
+         `colnames` a data fame object                  same as above but for columns
+                `$` operator, see text for usage        one extracted column, a vector
+
+  : Useful functions (and one operator) for data frames<span
+  data-label="data.frame"></span>
+
+A complete argument list is not feasible in this space, refer to the
+help documentation, see section [sec:help]
+
+### List {#sec:list}
+
+Lists are the most versitile data structure in `R`. Somewhat like data
+frames they can contain objects of different classes, but these objects
+are not organized into rows and columns; rather they can be thought of
+as a collection of objects stored together for convenience [^3]. For
+example, a list could store a vector, a matrix and a data frame all at
+once
+
+        \R{my.list <- list("x" = c("my","list"), "y" = M, "z" = play.data)}
+        \R{my.list}
+
+Notice that `"x"`, `"y"` and `"z"` are the names of the three elements
+in `my.list`. Just like columns in a data frame, we can access these
+different elements by their name, for example to access the vector
+called `x`
+
+        \R{my.list\$x}
+
+Once we've extracted one element from a list it behaves exactly as any
+other object of its class. That is, `my.list$x` can be treated like any
+other vector, `my.list$y` can be treated like any other matrix, and so
+on.
+
+We can also extract multiple elements from a list using indices in the
+same way we can extract multiple elements from a vector. For example,
+the first two elements of `my.list` can be accessed like
+
+        \R{my.list[1:2]}
+
+Notice that the result is another list (this time with only two
+elements). We can also use indices to extract single elements from a
+list, however, we must make `R` understand that we don't want a list
+containing the element indicated by our index, but instead we actually
+want that element itself. To do so we use double brackets (`[[`), for
+example to extract the first element of `my.list` we could use the
+command
+
+        \R{my.list[[1]]}
+
+    Function                                
+  ---------- ------------------------------ ------------------------
+      `list` elements to go into list       a data frame object
+    `length` a list object                  the number of elements
+         `$` operator, see text for usage   one extracted element
+
+  : Useful functions (and one operator) for lists
+
+A complete argument list is not feasible in this space, refer to the
+help documentation, see section [sec:help]
+
+Loading data files {#sec:reading}
+------------------
+
+There are two spread sheet file formats that `R` can read, `.csv` and
+`.txt`, which use commas and tabs, respectively, to delimit columns.
+Both can be generated from an excel file.
+
+To read in files, there are two simple commands: `read.csv` and
+`read.tabel`, which take the file directory as their primary argument.
+The file directory is the "path" to the file completed by the file name.
+Two examples are:
+
+A file named `farmers_almanac.txt` saved on the desktop of a Mac
+
+        Users/farmer_joe/Desktop/farmers_almanac.txt
+
+A file named `farmers_almanac.txt` saved on the desktop of a PC
+
+        C:\Users\farmer_bob\Desktop\farmers_almanac.txt
+
+File directories can be confusing and are easy to mess up. Two helpful
+strategies are to use the functions `getwd()` and `setwd(...)`, or to
+"copy" the path. `getwd()` prints the first part of the file directory
+(everything before `Desktop` in the examples above) which can be copied
+and pasted into one of the `read` functions. `setwd` takes as its
+argument a path along which `R` will look for your file, so you can set
+the path to always be, for example, your desktop. Copying the path is
+different on different operating systems. On a Mac, one can simply
+"drag" the file into the R console, in a PC, one must write-click the
+file, select properties and copy the location, pasting it into `R`. PC's
+use back slashes in path directories, which will not work in `R` hence
+you will need to change any back slashes to forward slashes.
+
+Let's begin with loading the file `GrasshopperAbundance.csv` (see Table
+[datasets]). Note that we first set the working directory to wherever
+the file is saved.
+
+        \R{setwd("/Users/farmer\_joe/Desktop")  \# just an example}
+        \R{hopper.abund <- read.csv(GrasshopperAbundance.csv,header=TRUE)}
+
+`read.csv` and `read.table` have many arguments, but two particularly
+important ones are of course the path (without which the function cannot
+load anything) and the argument `header`, which specifies whether the
+first row of the data file should be set aside as the column headers.
+This is the case in `GrasshopperAbundance.csv` so we set `header=TRUE`.
+
+To examine the imported data file to make sure we have not read extra
+rows or columns and to see that the column headers are acceptable, we
+can simply type `hop.abund` in the console and press enter (just like
+viewing any other object). For longer imported data files (of say $>$100
+rows) it is often more convenient to only view a few of the first rows,
+for example `hop.abund[1:3, ]`.[^4]
+
+        Function                                           
+  -------------- ----------------------------------------- ------------------------------
+      `read.csv` `file`: the file directory in quotes      `data.frame` containing data
+                 `header`: should $1^{st}$ row be header   
+    `read.table` `file`: the file directory in quotes      `data.frame` containing data
+                 `header`: should $1^{st}$ row be header   
+                 `sep`: the column delimiter in quotes     
+         `getwd` none                                      prints the current directory
+         `setwd` the desired directory in quotes           none
+
+  : Useful functions for loading data
+
+A complete argument list is not feasible in this space, refer to the
+help documentation, see section [sec:help]
+
+Data Manipulation
+=================
+
+Under each section on data structures ([sec:vector]–[sec:list]), we have
+already discussed ways to subset and extract specific values from each
+data structure. Here, we provide tools to do this in a more nuanced way.
+For motivation, consider the situation in which we would like to
+consider only those rows of `hop.abund` (see [sec:reading] and Table
+[datasets]) for which the abundance in 2006 was greater than 200
+individuals, or perhaps we only want to consider the subfamily
+Gomphocerinae. Further, we might like to make a species abundance
+distribution which would require us to sort the rows of `hop.abund` in
+descending order by abundance.
+
+Logical and Comparison Operators
+--------------------------------
+
+If we would like to subset a data object based on some given condition
+(e.g. that abundance is greater than 200) we do so with logical
+operators, such as `>` and `<`. Logical operators are akin to asking a
+question, which `R` will answer for you. For example we could ask *Is*
+`hop.abund$abund06` *greater than 200?*
+
+        \R{hop.abund\$abund06 > 200}
+
+and `R` will respond
+
+        \R{[1] FALSE FALSE FALSE FALSE FALSE ...}(20 more values)
+
+Notice that `R` responds element-wise, i.e. for each element of
+`hop.abund$abund06 R` returns an answer to our question: *is element one
+greater than 200?* `FALSE`, *is element two greater than 200?* `FALSE`,
+and so on, until *is element eleven greater than 200?* `TRUE`.
+
+There are further logical operators yet. To ask questions about specific
+values, for example which elements are equal to 0, we use the double
+equal (`==`) operator, and to find out which elements are not equal to a
+specific value, for example 0 again, we use the bang equal (`!=`)
+operator
+
+        \R{> hop.abund\$abund06 == 0}
+        \R{[1] FALSE FALSE FALSE FALSE TRUE ...}(20 more values)
+        \R{> hop.abund\$abund06 != 0}
+        \R{[1] TRUE TRUE TRUE TRUE FALSE ...}(20 more values)
+
+Double equal and bang equal also work in the case of characters and
+factors, for example we could use double equal to ask which elements in
+the subfamily column are equal to Gomphocerinae
+
+        \R{> hop.abund\$subfamily=="Gomphocerinae"}
+        \R{[1] TRUE TRUE TRUE TRUE TRUE ...}(20 more values)
+
+We can use logical operators with even more versatility by
+simultaneously asking about several different conditions, for example is
+abundance greater than 200 in both 2006 AND 2007, or is abundance
+greater than 200 in either 2006 OR 2007. To do so, we need a slightly
+more sophisticated command
+
+        \R{\# are both greater?:}
+        \R{hop.abund\$abund06 > 200 \& hop.abund\$abund07 > 200}
+        \R{\# are either greater?:}
+        \R{hop.abund\$abund06 > 200 | hop.abund\$abund07 > 200}
+
+The `&` operator asks the "and" question, while the `|` operator asks
+the "or" question.
+
+While these operators are useful for asking about two to three
+conditions simultaneously, if we needed to test many conditions, we'd
+need a different operator. Luckily one exists, `%in%` which asks the
+question *are any elements in the object to the left found in the object
+to the right?* For example, suppose we want to condition on several
+different species names
+
+        \R{> these.names <- c("AUEL","AUFE","PSDE","PSTE","MEAR","MESA")}
+        \R{> hop.abund\$species \%in\% these.names}
+        \R{[1] FALSE FALSE TRUE TRUE FALSE ...} (20 more values)
+
+Lastly, the "bang" operator that was introduced with `!=` can also stand
+alone, and has the effect of reversing any boolean value, that is
+`!TRUE` is the same as `FALSE` and `!FALSE` is the same as `TRUE`. For
+example, suppose we in fact want all species *except* the ones in vector
+`these.names`
+
+        \R{> !(hop.abund\$species \%in\% these.names)}
+        \R{[1] TRUE TRUE FALSE FALSE TRUE ...} (20 more values)
+
+      Operator                                                               
+  ------------ ------------------------------------- ----------------------- ------------------
+        `>, <` Greater or less than                  `5 > 3`                 `TRUE`
+      `>=, <=` Greater, less than or equal to        `5 >= 3`                `TRUE`
+      `==, !=` Equal to, not equal to                `5 == 3`                `FALSE`
+           `!` Returns the opposite value            `!FALSE`                `TRUE`
+        `&, |` Are both (`&`) or either (`|`) true   `5 > 3 & 5 < 10`        `TRUE`
+        `%in%` Are values of right hand found        `1:3 %in% 2:4`          `FALSE TRUE ...`
+               in left hand                                                  
+    `all, any` Functions: are all or any of the      `any(c(TRUE, FALSE))`   `TRUE`
+               values true                           `all(c(TRUE, FALSE))`   `FALSE`
+
+  : Useful logical operators (and two functions)
+
+Subsetting and extracting data (revisited)
+------------------------------------------
+
+We can now more powerfully subset and extract data. Recall from section
+[sec:vector] that we can use `TRUE` and `FALSE` values to specify which
+elements we wish to extract. Hence to obtain all rows from `hop.abund`
+for which the 2006 abundance was greater than 200
+
+        \R{hop.abund[hop.abund\$abund06 > 200, ]}
+
+or to obtain all rows for which abundance in 2006 and in 2007 was above
+200
+
+        \R{hop.abund[hop.abund\$abund06 > 200 \& hop.abund\$abund06 > 200, ]}
+
+This works exactly the same no matter how we produce our `TRUE/FALSE`
+values. Hence, using `%in%` works just as well
+
+        \R{hop.abund[hop.abund\$species \%in\% these.names, ]}
+        \R{hop.abund[!(hop.abund\$species \%in\% these.names), ]}
+
+Reordering data
+---------------
+
+At the beginning of this section on data manipulation, we introduced the
+motivating example of needing to order specie abundances to eventually
+produce a species abundance distribution.[^5] This can easily be done
+for single vectors, such as `hop.abund$abund06` using the function
+`sort`
+
+        \R{sort(hop.abund\$abund06)}
+        \R{\# or to order abundance from greatest to least}
+        \R{sort(hop.abund\$abund06, decreasing = TRUE)}
+
+We can achieve a similar result using the function `order` which returns
+a vector of indices in order from the index referencing to the smallest
+element to the index referencing the largest element (or opposite). For
+example
+
+        \R{> order(hop.abund\$abund06)}
+        \R{[1] 5 17 18 12 16 ...} (20 more values)
+
+which means that element number five is the smallest, followed by
+seventeen, then eighteen, and so on. Just like with `sort` we can use
+the argument `decreasing = TRUE` to specify that we would like to order
+our vector from largest to smallest. Because the returned vector
+contains indices, we can use it to reorder our vector in decreasing or
+increasing order
+
+        \R{hop.abund\$abund06[order(hop.abund\$abund06)]}
+        \R{\# or in decreasing order...}
+        \R{hop.abund\$abund06[order(hop.abund\$abund06, decreasing=TRUE)]}
+
+We belabor this seeming convoluted method for sorting because, while
+`sort` works perfectly well for single vectors, imagine we want to sort
+the entire data frame `hop.abund`. For this task, the indices provided
+by `order` are particularly helpful. Exactly as we ordered the single
+vector `hop.abund$abund06`, so we can order the rows of `hop.abund`
+
+        \R{hop.abund[order(hop.abund\$abund06, decreasing=TRUE), ]}
+
+Now the data are ordered by the 2006 abundances, and we could make two
+abundance distribution plots, one for 2006 and one for 2007, with the
+ordering of species exactly the same in both. This is very convenient
+for, say, comparing community composition between the two years.
+
+One last reordering challenge is often encountered in data analysis.
+Suppose we have another data set with some of the same species as are in
+`hop.abund` but they are not in the same order. For example, suppose we
+enter by hand some data on body mass for three of our grasshopper
+species
+
+        \R{spp.name <- c("AGDE", "HATR", "MESA")}
+        \R{spp.mass <- c( 3.32, 7.03, 5.20)}
+        \R{hop.mass <- data.frame("spp" = spp.name, "mass" = spp.mass)}
+
+This data frame looks like $$\begin{array}{lrr}
+                &   \verb+spp+  &   \verb+mass+ \\
+        \verb+1+    &   \verb+AGDE+ &   \verb+3.32+ \\
+        \verb+2+    &   \verb+HATR+ &   \verb+7.03+ \\
+        \verb+3+    &   \verb+MESA+ &   \verb+5.20+ \\
+    \end{array}$$ Now we'd like to be able to associate each species'
+mass with its abundance. For such a trivial example we could easily do
+this by hand, but eventually we'll need to know how to automate such a
+task. We do so with the function `match` which *matches* the values in
+its first argument with those in its second, and returns the appropriate
+indices
+
+        \R{> match(hop.mass\$spp, hop.abund\$species)}
+        \R{[1] 1 8 25}
+
+This means that we can find data for AGDE in the first row of
+`hop.abund`, for HATR in the eight row, and so on. So to get the 2006
+abundance for these species we simply type
+
+        \R{hop.abund\$abund06[match(hop.mass\$spp, hop.abund\$species)]}
+
+and we can even put it all in one data frame using the function `cbind`
+
+        \R{cbind(hop.mass,}
+        \R{"abund06" = hop.abund\$abund06[match(hop.mass\$spp, hop.abund\$species)])}
+
+This example is rather trivial, but reordering data by something like
+species name becomes particularly important in phylogenetic inference in
+which it is highly unlikely that the order of taxon names in the
+phylogenetic tree object matches their names in the data object. Hence
+we must reorder the data object before we can study the data in the
+context of the phylogeny.
+
+Basic Statistical Functions
+===========================
+
+Now that we have covered the basics of data structures, importation, and
+manipulation, we can finally more on to the much more gratifying topic
+of preforming actual statistical analyses of our data. Unfortunately, it
+is beyond the scope of this tutorial to detail all the mathematical
+underpinnings of every statistical procedure addressed. While we will
+attempt to address which statistical procedures are applicable for which
+kinds of data, we focus on implementation and leave the details to other
+sources.
+
+To thoroughly explore the statistical functions of `R` we will need to
+import several more data files. We do that now so as not to muddle the
+computations down stream. Refer to Table [datasets] for the details of
+each data file, including meanings of columns, and to section
+[sec:reading] for details on importing files. Recall that we have set
+our working directory to be the desktop, hence we import like
+
+        \R{hop.distdecay <- read.csv("grasshopperDistanceDecay.csv", header=TRUE)}
+        \R{hop.feeding <- read.csv("grasshopperFeeding.csv", header=TRUE)}
+
+Formula Syntax
+--------------
+
+We begin by addressing the typical syntax for indicating the dependent
+and independent (i.e. response and "treatment") variables in a test.
+Often we think of *y* as dependent upon *x*; that is, we manipulate some
+variable *x* and measure the response *y*. Often times in ecology and
+evolution, *x* is actually something that we have let nature vary—it is
+varying temperatures measured across latitude or though geologic time,
+or it may be the geographic distance between sampling points. All the
+same, we consider *x* to be the explanatory, independent variable. The
+way we communicate this to `R` is with the tilde
+
+        \R{y\~{}x}
+
+which literally means *y* dependent on *x*, or *y* as a function of *x*.
+This is the syntax for everything from t-tests to factorial ANOVA to
+regression. We will discuss all these and more in the coming sections.
+We will also point out the few cases in which formula syntax is not
+used.
+
+Assessing normality {#sec:normTest}
+-------------------
+
+Many statistical tests require that our data be normally distributed.
+Hence, before launching into the details of these tests, we must first
+gain an understanding of how we can assess the normality of our data.
+The simplest (though non-quantitative) way to do this is with
+`qqnorm(x)`, where `x` is our data in the form of a single vector, which
+compares the quantiles of our data with those of a standard normal
+distribution (i.e. $\mu$ = 0, $\sigma^2$ = 1; see Fig. [qqplot]).
+
+![Example QQ plots. Each plot shows different general deviations from
+normality. A: less kurtosis; B: fat tails; C: skew right; D: skew left.
+In all cases, the alternating gray and white bars represent quantiles,
+and the standard normal is on the x-axis<span
+data-label="qqplot"></span>](qqplot_eg)
+
+Hence, if our data are normal, `qqnorm(x)` will produce a strait line,
+and if our data our systematically biased away from normal, the plot
+from `qqnorm(x)` will appear in some way curved as per Figure [qqplot].
+
+The alternative, quantitative, possibility is to conduct a formal test
+of normality. Many exist, however, the Shapiro–Wilk test is a strong
+contender and easily implemented in `R`.[^6] To execute a Shapiro–Wilk
+test of normality, we simply use the command `shapiro.test(x)`, where
+`x` is our data just like in `qqnorm(x)`. If the *p*-value is greater
+than 0.05 we accept the null hypothesis that our data were drawn from a
+normal distribution. Such rigorous tests of normality are often not
+necessary, as symmetry about the mean is often sufficient to produce
+meaningful test statistics.
+
+Two-way comparison of distributions
+-----------------------------------
+
+One of the most common statistical tasks seems to be comparing two
+means, or comparing one mean to a specific value (most often 0). We ask
+the question, *Are the means of these two distributions significantly
+different?* or, *Is the mean of this one distribution different from
+0?*. We typically achieve this with a Student's t-test.
+
+### Student's t-test {#sec:tTest}
+
+Let's use the `hop.distdecay` data set to see if there is any difference
+in average community similarity between the two transect types,
+"distance" (`d`), and "elevation" (`e`). The vector `hop.distdecay$tran`
+contains the transect types, and vector `hop.distdecay$sim` contains the
+similarities. We begin by testing normality
+
+        \R{\# first for the elevation points}
+        \R{qqnorm(hop.distdecay\$sim[hop.distdecay\$tran=="e"])}
+        \R{\# now for the distance points}
+        \R{qqnorm(hop.distdecay\$sim[hop.distdecay\$tran=="d"])}
+
+We observe that the elevation transect appears to be slightly right
+skewed, but proceed with the exam, for demonstrative purposes if no
+other. By default `R` will evaluate the variances of both distributions
+and if they are not equal it will apply Welch's correction to the
+degrees of freedom. Hence, we often observe a non-integer degrees of
+freedom.
+
+This is the default output for a t-test, which nicely summarizes all
+output of interest including test statistic, degrees of freedom and
+*p*-value. However, often we need to extract one or several of these
+values separately. Luckily, because `t.test` actually produces a list,
+we can extract any information we want with the `$` operator. For
+example:
+
+        \R{> our.t.test <- t.test(hop.distdecay\$sim~hop.distdecay\$tran)}
+        \R{> names(our.t.test) \# to learn which names hold the desired info}
+        \R{[1] "statistic"   "parameter"   "p.value"     "conf.int" ...} (5 more)
+        \R{> our.t.test\$p.value  \#for the p-value}
+        \R{[1]  8.351836e-08}
+        \R{> our.t.test\$conf.int  \# for the confidence interval}
+        \R{[1] 0.1338735 0.2706742}
+
+Function `t.test` has several other arguments worth noting, including
+`paired` (default `FALSE`) which can be set equal to `TRUE` to preform a
+paired t-test, and `conf.level` which defaults to 0.05 but can be set to
+another value and determines the limits of the returned confidence
+interval. For example if a 99% confidence interval is desired we set
+`conf.level = 0.01`. We can also suppress Welch's correction by setting
+`var.equal = TRUE`. Lastly, if our data are organized in two separate
+vectors using formula syntax is difficult, and so `t.test` will allow us
+to enter two vectors (`x` and `y`) which will be compared
+
+        \R{t.test(x = hop.distdecay\$sim[hop.distdecay\$tran=="e"],}
+        \R{y =  hop.distdecay\$sim[hop.distdecay\$tran=="e"])}
+
+### Wilcoxon rank test
+
+Because our QQ plot showed slight right skewness perhaps we should in
+fact not use a parametric test. A common non-parametric alternative to
+the t-test is the Wilcoxon rank test (also known as the Mann-Whitney
+test) which first ranks our data and then determines if one sample has
+significantly higher ranks than the other. Thus, this test can be viewed
+as evaluating whether there is a non-zero shift in central tendency of
+the two samples. We execute it in `R` with the function `wilcox.test`
+
+The warning message simply means that there were ties in the data. It is
+up to the investigator to determine if such ties are detrimental to the
+result. In this case with such a small *p*-value combined with a large N
+(most of which are not tied) we can be relatively sure our result is
+sound. Like the result from `t.test` the output of `wilcox.test` is
+actually a list, and we can access all the values using the `$` operator
+just like before. Paired Wilcoxon tests are also possible; we must take
+the difference (i.e. subtract) the two vectors of interest and preform a
+one sample Wilcoxon test.
+
+Analysis of Variance {#sec:anova}
+--------------------
+
+Another common task is to compare multiple (3+) samples at once. For
+this we employ an analysis of variance (ANOVA).
+
+### Parametric ANOVA
+
+The simplest case is a one-way analysis in which we compare one
+"factor"[^7] with multiple groups, for example comparing some trait of
+several different species. The "factor" is taxonomic, and the groups are
+all the different species. We could compare the dietary preference of
+different grasshopper species in the `hop.feeding` data using ANOVA.
+Let's choose to quantify dietary preference as the difference between
+amount eaten of the two grass species (see Table [datasets] for details
+on the columns of `hop.feeding`). We conduct an ANOVA with the function
+`aov` and for reasons that will become apparent, we store the output of
+this analysis under a name of our choosing
+
+        \R{\# first calculate diet preference as difference in amount eaten}
+        \R{hop.diet <- hop.feeding\$blue.herb - hop.feeding\$black.herb}
+        \R{our.aov <- aov(hop.diet \~{} hop.feeding\$species)}
+
+We assign our ANOVA to an object because `R` does not provide a nice
+display of the results like it did for `t.test` and `wilcox.test`. Hence
+we must specifically ask for the results to be summarized with the
+simple function `summary`
+
+Function `aov` also does return a list like `t.test` and `wilcox.test`
+so we can also extract specific values with the `$` operator. To see all
+the different values we can extract, us the `names` function, like
+`names(our.aov)`.
+
+We did not check for normality as we did before executing `t.test`
+because the results from `aov` can actually be plotted very simply to
+check that no assumptions have been violated. We do so simply by typing
+
+        \R{plot(our.aov)}
+
+and the results are presented in Figure [aovPlot]. Because there is no
+trend in the residuals, and the QQ plot appears relatively strait, we
+can feel comfortable with doing a parametric test on these data.
+
+![Plot of ANOVA output. The two plots of particular interest for
+checking that no assumptions have been violated are the Residuals vs
+Fitted plot, and the Q-Q Normal plot. If no assumptions are violated,
+the residuals should fall along a flat line (potentially with spread),
+and the QQ plot should show a strait diagonal line (see section
+[sec:normTest] and Figure [qqplot]).<span
+data-label="aovPlot"></span>](aov_plot)
+
+We can also preform a post-hoc test to determine which species is/are
+driving this pattern. We do so most simply with the Tukey post-hoc test
+
+This shows that PSDE is significantly different from the other two
+species (note the *p*-values). We are also given confidence intervals on
+the difference in mean for each comparison, which corroborate the
+*p*-values.
+
+ANOVA can be much more powerful. We defer much more detailed exploration
+to the section on more advanced statistics (section [sec:sim]). We
+will, however, demonstrate a two-way ANOVA which deals with multiple
+factors. Previously we analyzed the difference in community similarity
+between distance and elevation transects (section [sec:tTest]). We
+ignored any possible effect of transect replicate (column
+`hop.distdecay$rep`, see Table [datasets]) on community similarity.
+
+### Kruskal-Wailis test
+
+While in this example, if we felt that the assumptions of parametric
+ANOVA were violated, we could instead opt for the non-parametric
+Kruskal-Wailis test, which is an extension of the rank test for
+comparing two samples, but can compare multiple samples at once. We do
+so with very similar syntax
+
+        \R{our.kruskal <- kruskal.test(hop.diet~hop.feeding\$species)}
+        \R{summary(our.kruskal)}
+
+The result is again a list which we must summarize. There is no
+pre-defined means of conducting a post-hoc analysis. One option would be
+to conduct individual Wilcoxon rank test for each pairwise comparison
+and then correct for multiple comparisons.
+
+Regression
+----------
+
+`lm, glm`\
+`anova`
+
+Frequencies and Ratios
+----------------------
+
+`chisq.test, fisher.test`
+
+-->
+
+# Common Probability Distributions {#sec:distrib}
+
+# Graphics {#sec:plotting}
+
+# Simulation and Permutation {#sec:sim}
+
+# Writing Your Own Functions {#sec:funs}
+
+
+
+[^1a]: Note: this is an example where classes determine the possible operations that can be done on a object; a vector of class `character` cannot be operated on by `+, - *`, etc.
+
+[^1b]: See in section [sec:matrix] for linear algebra operations
+
+<!--
+
+[^2]: The numeric identifiers default to alphabetical order, which is
+    important to remember if a specific ordering of factors is desired
+    for, e.g. plotting.
+
+[^3]: For example, many functions that need to return several different
+    pieces of information (e.g. test statistic, degrees of freedom,
+    p-value, confidence interval, etc.) packages this into a list
+
+[^4]: for a refresher on subsetting and extracting with data frames, see
+    section [sec:data.frame]
+
+[^5]: See section [sec:plotting] for actually producing such a graphic
+
+[^6]: The more rigorous Anderson–Darling test is implemented in the
+    package `nortest` as function `ad.test`
+
+[^7]: Note: this is not a `factor` in the computing sense
+
+-->
